@@ -1,0 +1,678 @@
+<!doctype html>
+<html lang="en" data-mode="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Istanbul Museums</title>
+<meta name="description" content="Map of Istanbul's museums and sights with tickets, opening hours, Museum Pass coverage and walking routes.">
+<meta name="theme-color" content="#ffffff">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Museums">
+<meta property="og:title" content="Istanbul Museums">
+<meta property="og:description" content="Map, tickets, hours and walking routes for Istanbul's museums and sights.">
+<meta property="og:image" content="og.png">
+<meta property="og:type" content="website">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="favicon.png">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<style>
+:root{
+  --bg:#ffffff;--land:#f2f2ef;--mah:#dcdcd7;--water:#d6dee3;--fg:#0d0d0d;--fg2:#555555;--fg3:#868686;
+  --line:#dadada;--fill:#ececec;--glass:rgba(255,255,255,.9);--rail:#8a8a8a;--ok:#16803a;--bad:#c81818;--warn:#a65200;
+  --a-sa:#EE352E;--a-gh:#FF6319;--a-bg:#00933C;--a-fb:#FCCC0A;--a-bs:#0039A6;--a-as:#B933AD;--a-ap:#808183;
+  --font:-apple-system,BlinkMacSystemFont,"Helvetica Neue",Helvetica,Arial,sans-serif;
+  --sh:0 6px 24px rgba(0,0,0,.14);--r:14px;color-scheme:light;
+  padding-top:0!important;padding-bottom:0!important;
+}
+:root[data-mode="dark"]{
+  --bg:#0b0b0b;--land:#1c1c1c;--mah:#2e2e2e;--water:#0f1418;--fg:#f4f4f4;--fg2:#a8a8a8;--fg3:#6e6e6e;
+  --line:#2e2e2e;--fill:#202020;--glass:rgba(22,22,22,.9);--rail:#727272;--ok:#3ccf6a;--bad:#ff5a4f;--warn:#ffa640;color-scheme:dark}
+*{box-sizing:border-box}
+html,body{height:100%;margin:0}
+body{background:var(--water);color:var(--fg);font:15px/1.4 var(--font);overflow:hidden;-webkit-font-smoothing:antialiased;-webkit-text-size-adjust:100%}
+button{font:inherit;color:inherit;background:none;border:0;cursor:pointer;padding:0;-webkit-tap-highlight-color:transparent}
+a{color:inherit;-webkit-tap-highlight-color:transparent}
+[hidden]{display:none!important}
+:focus-visible{outline:2px solid var(--fg);outline-offset:2px;border-radius:8px}
+svg.i{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round;flex:none}
+
+.leaflet-container{overflow:hidden;background:var(--water);outline:0;-webkit-tap-highlight-color:transparent;touch-action:none;font:inherit}
+.leaflet-container img{max-width:none!important;max-height:none!important}
+.leaflet-pane,.leaflet-tile,.leaflet-marker-icon,.leaflet-tile-container,.leaflet-pane>svg,.leaflet-pane>canvas,.leaflet-layer{position:absolute;left:0;top:0}
+.leaflet-tile{user-select:none;-webkit-user-drag:none;visibility:hidden}.leaflet-tile-loaded{visibility:inherit}
+.leaflet-fade-anim .leaflet-tile{will-change:opacity}.leaflet-fade-anim .leaflet-pane .leaflet-tile{transition:opacity .2s linear}
+.leaflet-pane{z-index:400}.leaflet-map-pane{z-index:0}.leaflet-tile-pane{z-index:200}.leaflet-overlay-pane{z-index:400}.leaflet-marker-pane{z-index:600}
+.leaflet-zoom-anim .leaflet-zoom-animated{transition:transform .25s cubic-bezier(0,0,.25,1)}
+.leaflet-zoom-animated{transform-origin:0 0}.leaflet-zoom-anim .leaflet-zoom-hide{visibility:hidden}
+.leaflet-control-container{display:none}
+#map{position:fixed;inset:0}
+.attr{position:fixed;z-index:5;right:calc(6px + env(safe-area-inset-right,0px));bottom:calc(4px + env(safe-area-inset-bottom,0px));font-size:9.5px;color:var(--fg3);pointer-events:none}
+
+.b{display:inline-grid;place-items:center;width:28px;height:28px;border-radius:50%;color:#fff;font:700 11px/1 var(--font);letter-spacing:-.02em;flex:none;box-shadow:0 0 0 2px var(--bg)}
+.b.y{color:#111}
+.b.x{border-radius:4px;transform:rotate(45deg);width:21px;height:21px;margin:3.5px}.b.x>span{transform:rotate(-45deg)}
+.mk{position:relative;transition:transform .15s}
+.mk .b{width:26px;height:26px;font-size:10.5px;box-shadow:0 0 0 2px var(--bg),0 2px 6px rgba(0,0,0,.28);margin:0}
+.mk .b.x{width:19px;height:19px;margin:3.5px}
+.mk.off .b{filter:grayscale(1);opacity:.5}
+.mk.dim{opacity:.22}.mk.sel{transform:scale(1.3)}
+.mk .no{position:absolute;top:-8px;right:-9px;min-width:17px;height:17px;padding:0 4px;border-radius:9px;background:var(--fg);color:var(--bg);font:700 10px/17px var(--font);text-align:center}
+.alabel{font:700 10.5px/1 var(--font);letter-spacing:.12em;text-transform:uppercase;color:var(--fg3);white-space:nowrap;transform:translate(-50%,-50%);pointer-events:none}
+.alabel.w{font-weight:500;letter-spacing:.04em;text-transform:none;font-style:italic}
+.tl{font:700 9px/1 var(--font);background:var(--rail);color:var(--bg);padding:3px 4px;border-radius:3px;transform:translate(-50%,-50%);pointer-events:none;white-space:nowrap}
+.me{width:18px;height:18px;border-radius:50%;background:#1a73e8;border:3px solid #fff;box-shadow:0 1px 4px rgba(0,0,0,.35)}
+
+.glass{background:var(--glass);backdrop-filter:blur(18px) saturate(1.4);-webkit-backdrop-filter:blur(18px) saturate(1.4);box-shadow:var(--sh)}
+.island{position:fixed;z-index:20;top:calc(10px + env(safe-area-inset-top,0px));left:50%;transform:translateX(-50%);height:36px;padding:0 14px;border-radius:18px;display:flex;align-items:center;gap:8px;font-size:13px;font-weight:600;white-space:nowrap;font-variant-numeric:tabular-nums}
+.island .dot{width:8px;height:8px;border-radius:50%;background:var(--ok)}
+.island .dot.past{background:var(--warn)}
+.island small{color:var(--fg2);font-weight:500;font-size:13px}
+.rail{position:fixed;z-index:20;right:calc(10px + env(safe-area-inset-right,0px));top:calc(56px + env(safe-area-inset-top,0px));display:flex;flex-direction:column;gap:8px}
+.grp{border-radius:12px;overflow:hidden;display:flex;flex-direction:column}
+.ib{width:44px;height:44px;display:grid;place-items:center;color:var(--fg);flex:none}
+.grp .ib+.ib{border-top:1px solid var(--line)}
+.ib[aria-pressed="true"]{color:#1a73e8}
+.toast{position:fixed;z-index:60;left:50%;transform:translateX(-50%);top:calc(54px + env(safe-area-inset-top,0px));width:max-content;max-width:calc(100% - 32px);padding:10px 14px;border-radius:12px;font-size:13.5px;background:var(--fg);color:var(--bg)}
+
+.sheet{position:fixed;z-index:30;left:0;right:0;bottom:0;height:calc(100% - 54px - env(safe-area-inset-top,0px));background:var(--bg);border-radius:16px 16px 0 0;box-shadow:0 -2px 24px rgba(0,0,0,.14);display:flex;flex-direction:column;transition:transform .3s cubic-bezier(.2,.8,.2,1)}
+.sheet.drag{transition:none}
+.grab{flex:none;height:22px;display:grid;place-items:center;touch-action:none;cursor:grab}
+.grab i{width:36px;height:5px;border-radius:3px;background:var(--fg3)}
+.head{flex:none;padding:0 max(12px,env(safe-area-inset-right,0px)) 0 max(16px,env(safe-area-inset-left,0px));border-bottom:1px solid var(--line)}
+.hrow{display:flex;align-items:center;gap:2px}
+.tabs{display:flex;gap:18px;flex:1}
+.tabs button{height:44px;font-size:15px;font-weight:600;color:var(--fg2);border-bottom:2px solid transparent;margin-bottom:-1px}
+.tabs button[aria-selected="true"]{color:var(--fg);border-color:var(--fg)}
+.srch{display:flex;align-items:center;gap:8px;height:38px;border-radius:10px;background:var(--fill);padding:0 10px;margin:0 0 10px;color:var(--fg2)}
+.srch input{flex:1;min-width:0;border:0;background:none;outline:0;font:inherit;font-size:16px;color:var(--fg)}
+.body{flex:1;overflow-y:auto;overscroll-behavior:contain;-webkit-overflow-scrolling:touch;padding:6px max(16px,env(safe-area-inset-right,0px)) calc(32px + env(safe-area-inset-bottom,0px)) max(16px,env(safe-area-inset-left,0px))}
+
+.chips{display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;padding:4px 0}
+.chips::-webkit-scrollbar{display:none}
+.chip{flex:none;height:32px;padding:0 12px;border-radius:16px;border:1px solid var(--line);font-size:13px;font-weight:600}
+.chip[aria-pressed="true"]{background:var(--fg);color:var(--bg);border-color:var(--fg)}
+.gh{display:flex;align-items:center;gap:8px;margin:20px 0 2px;font-size:12px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--fg2)}
+.gh i{width:10px;height:10px;border-radius:50%;flex:none}
+.gh span{margin-left:auto;font-weight:600;letter-spacing:0;text-transform:none}
+.row{display:flex;align-items:center;gap:12px;width:100%;min-height:58px;padding:8px 0;text-align:left;border-bottom:1px solid var(--line)}
+.rt{flex:1;min-width:0;display:flex;flex-direction:column;gap:1px}
+.l1,.l2{display:flex;align-items:baseline;gap:8px;min-width:0}
+.l1 b{flex:1;min-width:0;font-size:15px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.l2 small{flex:1;min-width:0;font-size:13px;color:var(--fg2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pr{flex:none;font-size:13px;font-weight:600;font-variant-numeric:tabular-nums;white-space:nowrap}
+.pr em{font-style:normal;font-weight:500;color:var(--fg2)}
+.s-open{color:var(--ok)}.s-closed{color:var(--bad)}.s-warn{color:var(--warn)}
+.tag{flex:none;display:inline-block;font:700 9.5px/1 var(--font);letter-spacing:.06em;padding:3px 5px;border-radius:4px;border:1px solid currentColor}
+.tag.p{background:var(--fg);color:var(--bg);border-color:var(--fg)}
+.tag.n{color:var(--fg2)}
+.chk{color:var(--ok);font-weight:700}
+.empty{padding:32px 0;text-align:center;color:var(--fg2)}
+.foot{margin:18px 0 0;color:var(--fg3);font-size:12px;line-height:1.5}
+
+.top{display:flex;align-items:center;gap:8px;margin:4px 0 10px}
+.top .ib{width:36px;height:36px;border-radius:18px;background:var(--fill)}
+.top b{font-size:17px}
+.dh{display:flex;gap:12px;align-items:flex-start}
+.dh .b{width:40px;height:40px;font-size:14px}.dh .b.x{width:30px;height:30px;margin:5px}
+.dh h2{margin:0;font-size:22px;line-height:1.15;font-weight:700;letter-spacing:-.015em;text-wrap:balance}
+.dh p{margin:3px 0 0;color:var(--fg2);font-size:14px}
+.acts{display:flex;justify-content:space-between;margin:16px 0}
+.act{display:flex;flex-direction:column;align-items:center;gap:5px;font-size:11px;font-weight:600;color:var(--fg2);width:20%;text-decoration:none}
+.act span{width:48px;height:48px;border-radius:24px;background:var(--fill);color:var(--fg);display:grid;place-items:center}
+.act.on span{background:var(--fg);color:var(--bg)}
+.facts{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px}
+.fact{background:var(--fill);border-radius:12px;padding:10px 12px;min-width:0}
+.fact small{display:block;font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--fg2)}
+.fact b{display:block;font-size:16px;font-weight:600;margin-top:2px;font-variant-numeric:tabular-nums}
+.fact em{display:block;font-style:normal;font-size:12.5px;color:var(--fg2)}
+.fact.w{grid-column:1/-1}
+.bars{height:8px;border-radius:4px;background:var(--line);margin:8px 0 4px;position:relative}
+.bars i{position:absolute;top:0;bottom:0;background:var(--ok);border-radius:4px}
+.bars u{position:absolute;top:-3px;bottom:-3px;width:2px;background:var(--fg)}
+.scale{display:flex;justify-content:space-between;font-size:10.5px;color:var(--fg3);font-variant-numeric:tabular-nums}
+.ask{width:100%;text-align:left;border:1.5px solid var(--fg);border-radius:var(--r);padding:12px 14px;margin:4px 0 8px;display:flex;gap:12px;align-items:center}
+.ask div{flex:1;min-width:0}
+.ask small{display:block;font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--fg2)}
+.ask b{display:block;font-size:18px;line-height:1.25;margin:3px 0 2px}
+.ask em{display:block;font-style:normal;font-size:13px;color:var(--fg2)}
+.txt{padding:12px 0;border-top:1px solid var(--line);font-size:14.5px}
+.txt h3{margin:0 0 3px;font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--fg2)}
+.txt p{margin:0;max-width:62ch}
+
+.big{position:fixed;inset:0;z-index:70;background:var(--bg);display:flex;flex-direction:column;justify-content:center;padding:calc(24px + env(safe-area-inset-top,0px)) max(28px,env(safe-area-inset-right,0px)) calc(24px + env(safe-area-inset-bottom,0px)) max(28px,env(safe-area-inset-left,0px))}
+.big b{font-size:clamp(34px,9vw,64px);line-height:1.1;letter-spacing:-.02em;text-wrap:balance}
+.big p{color:var(--fg2);font-size:17px;margin:16px 0 0}
+.big .ib{position:absolute;top:calc(12px + env(safe-area-inset-top,0px));right:calc(12px + env(safe-area-inset-right,0px));border-radius:22px;background:var(--fill)}
+
+.route{border-bottom:1px solid var(--line);padding:12px 0}
+.rh{display:flex;align-items:center;gap:12px;width:100%;text-align:left}
+.rh .b{width:34px;height:34px;font-size:15px}
+.rh .t{flex:1;min-width:0}
+.rh .t b{display:block;font-size:16px;font-weight:700}
+.rh .t small{display:block;font-size:13px;color:var(--fg2)}
+.route .d{margin:8px 0 0 46px;font-size:14px;color:var(--fg2);max-width:60ch}
+.line{margin:10px 0 0 46px;position:relative;list-style:none;padding:0}
+.line::before{content:"";position:absolute;left:8px;top:12px;bottom:12px;width:4px;border-radius:2px;background:var(--lc)}
+.line li{position:relative;padding:5px 0 5px 30px}
+.line li::before{content:"";position:absolute;left:3px;top:10px;width:14px;height:14px;border-radius:50%;background:var(--bg);border:3px solid var(--lc);box-sizing:border-box}
+.line li.walk{padding:2px 0 2px 30px;font-size:12.5px;color:var(--fg2);font-style:italic}
+.line li.walk::before{display:none}
+.line button{text-align:left;width:100%}
+.line b{font-weight:600;font-size:14.5px}
+.line small{display:block;font-size:12.5px;color:var(--fg2);font-variant-numeric:tabular-nums}
+.rbar{display:flex;gap:8px;margin:10px 0 0 46px;align-items:center;flex-wrap:wrap}
+.pill{height:36px;padding:0 14px;border-radius:18px;background:var(--fill);font-size:13.5px;font-weight:600;display:inline-flex;align-items:center;gap:6px;text-decoration:none}
+.pill.solid{background:var(--fg);color:var(--bg)}
+.cost{font-size:13px;color:var(--fg2);font-variant-numeric:tabular-nums}
+
+.sec{margin-top:22px}
+.sec>h3{margin:0 0 8px;font-size:12px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--fg2);display:flex;justify-content:space-between}
+.sec>h3 span{letter-spacing:0;text-transform:none;font-weight:600}
+.days{display:flex;gap:6px;overflow-x:auto;scrollbar-width:none}
+.days::-webkit-scrollbar{display:none}
+.day{flex:1 0 44px;height:54px;border-radius:12px;border:1px solid var(--line);display:flex;flex-direction:column;align-items:center;justify-content:center;font-size:11px;font-weight:600;color:var(--fg2)}
+.day b{font-size:18px;color:var(--fg)}
+.day[aria-pressed="true"]{background:var(--fg);border-color:var(--fg);color:var(--bg)}.day[aria-pressed="true"] b{color:var(--bg)}
+.when{display:flex;align-items:baseline;justify-content:space-between;margin:14px 0 0}
+.when b{font-size:30px;font-weight:700;letter-spacing:-.02em;font-variant-numeric:tabular-nums}
+.when span{font-size:14px;color:var(--fg2)}
+input[type=range]{width:100%;accent-color:var(--fg);height:30px;margin:4px 0 0}
+.ticks{display:flex;justify-content:space-between;font-size:10.5px;color:var(--fg3);font-variant-numeric:tabular-nums}
+.bul{display:flex;flex-wrap:wrap;gap:6px}
+.bul button{display:inline-flex;align-items:center;gap:6px;height:32px;padding:0 10px 0 3px;border-radius:16px;background:var(--fill);font-size:13px;font-weight:600}
+.bul .b{width:26px;height:26px;font-size:10px;box-shadow:none}.bul .b.x{width:18px;height:18px;margin:4px}
+.week{display:grid;grid-template-columns:44px 1fr;border-top:1px solid var(--line)}
+.week>div{padding:8px 0;border-bottom:1px solid var(--line);display:flex;align-items:center;gap:4px;flex-wrap:wrap;min-height:44px}
+.week .dn{font-weight:700;font-size:13px}
+.week .on{color:var(--fg)}
+.week .dn.today::after{content:"";width:6px;height:6px;border-radius:50%;background:var(--fg);margin-left:4px}
+.week .b{width:24px;height:24px;font-size:9.5px;box-shadow:none}.week .b.x{width:17px;height:17px;margin:3.5px}
+.week .none{color:var(--fg3);font-size:13px}
+.mrow{padding:10px 0;border-bottom:1px solid var(--line)}
+.mrow .l1{align-items:center}
+.mrow .wins{font-size:12.5px;color:var(--fg2);margin-top:2px;font-variant-numeric:tabular-nums}
+.pts{display:flex;justify-content:space-between;font-size:12px;color:var(--fg2);margin-top:8px;font-variant-numeric:tabular-nums}
+.pts b{display:block;color:var(--fg);font-size:13.5px}
+.bento{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.tile{background:var(--fill);border-radius:var(--r);padding:12px;min-width:0;display:flex;flex-direction:column;gap:3px}
+.tile b{font-size:22px;font-weight:700;letter-spacing:-.02em;line-height:1.1;font-variant-numeric:tabular-nums}
+.tile span{font-size:13px;color:var(--fg2);line-height:1.35}
+.tile.w{grid-column:1/-1}
+.tile.k{background:var(--fg);color:var(--bg)}.tile.k span{color:color-mix(in srgb,var(--bg) 72%,var(--fg))}
+.meter{display:flex;gap:3px;margin-top:6px}
+.meter i{flex:1;height:6px;border-radius:2px;background:color-mix(in srgb,var(--bg) 25%,var(--fg))}
+.meter i.on{background:var(--bg)}
+
+.set{display:flex;align-items:center;justify-content:space-between;min-height:52px;border-bottom:1px solid var(--line);font-size:15px;gap:12px;width:100%;text-align:left}
+.sw{width:51px;height:31px;border-radius:16px;background:var(--line);position:relative;flex:none;transition:background .2s}
+.sw::after{content:"";position:absolute;top:2px;left:2px;width:27px;height:27px;border-radius:50%;background:#fff;box-shadow:0 2px 4px rgba(0,0,0,.25);transition:left .2s}
+.sw[aria-checked="true"]{background:var(--ok)}.sw[aria-checked="true"]::after{left:22px}
+.key{display:grid;grid-template-columns:auto 1fr;gap:8px 10px;align-items:center;font-size:14px}
+.steps{list-style:none;padding:0;margin:0;counter-reset:s}
+.steps li{counter-increment:s;display:flex;gap:12px;align-items:flex-start;padding:8px 0;font-size:14.5px}
+.steps li::before{content:counter(s);flex:none;width:24px;height:24px;border-radius:12px;background:var(--fg);color:var(--bg);font-size:12px;font-weight:700;display:grid;place-items:center}
+.steps svg{vertical-align:-4px;width:18px;height:18px}
+.seg{display:flex;background:var(--fill);border-radius:9px;padding:2px;margin-bottom:6px}
+.seg button{flex:1;height:30px;border-radius:7px;font-size:13px;font-weight:600;color:var(--fg2)}
+.seg button[aria-pressed="true"]{background:var(--bg);color:var(--fg);box-shadow:0 1px 3px rgba(0,0,0,.15)}
+
+@media (min-width:860px){
+  .sheet{left:calc(12px + env(safe-area-inset-left,0px));right:auto;top:12px;bottom:12px;width:390px;height:auto;border-radius:16px;transform:none!important;box-shadow:var(--sh)}
+  .grab{height:10px}.grab i{display:none}
+  .island{left:calc(414px + (100% - 414px)/2)}
+}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+<div id="map" role="application" aria-label="Map of Istanbul"></div>
+<div class="attr" id="attr">© OpenStreetMap · © CARTO</div>
+<button class="island glass" id="island" aria-label="Open plan"></button>
+<div class="rail">
+  <div class="grp glass">
+    <button class="ib" id="bLoc" aria-label="Show my location" aria-pressed="false"><svg class="i" viewBox="0 0 24 24"><path d="M3 11 21 3l-8 18-2-8z"/></svg></button>
+  </div>
+  <div class="grp glass">
+    <button class="ib" id="bIn" aria-label="Zoom in"><svg class="i" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg></button>
+    <button class="ib" id="bOut" aria-label="Zoom out"><svg class="i" viewBox="0 0 24 24"><path d="M5 12h14"/></svg></button>
+  </div>
+</div>
+<div class="toast" id="toast" role="status" hidden></div>
+<div class="big" id="big" hidden></div>
+
+<section class="sheet" id="sheet">
+  <div class="grab" id="grab" role="button" aria-label="Resize panel"><i></i></div>
+  <div class="head">
+    <div class="hrow">
+      <div class="tabs" role="tablist">
+        <button role="tab" data-t="places" aria-selected="true">Places</button>
+        <button role="tab" data-t="routes" aria-selected="false">Routes</button>
+        <button role="tab" data-t="plan" aria-selected="false">Plan</button>
+      </div>
+      <button class="ib" id="bSearch" aria-label="Search" aria-pressed="false"><svg class="i" viewBox="0 0 24 24"><circle cx="11" cy="11" r="6.5"/><path d="m16 16 4.5 4.5"/></svg></button>
+      <button class="ib" id="bSet" aria-label="Settings"><svg class="i" viewBox="0 0 24 24"><path d="M4 7h10M18 7h2M4 17h4M12 17h8"/><circle cx="16" cy="7" r="2"/><circle cx="10" cy="17" r="2"/></svg></button>
+    </div>
+    <label class="srch" id="srch" hidden><svg class="i" viewBox="0 0 24 24" style="width:16px;height:16px"><circle cx="11" cy="11" r="6.5"/><path d="m16 16 4.5 4.5"/></svg><input id="q" type="search" placeholder="Name, Turkish name or code" autocomplete="off" aria-label="Search places"></label>
+  </div>
+  <div class="body" id="body"></div>
+</section>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.js"></script>
+<script>
+const FX={usdTry:49.6,eurUsd:1.12};
+const AREA={
+ sa:{n:"Sultanahmet",c:"--a-sa"},gh:{n:"Bazaars · Süleymaniye",c:"--a-gh"},bg:{n:"Galata · Beyoğlu",c:"--a-bg"},
+ fb:{n:"Balat · Golden Horn",c:"--a-fb",y:1},bs:{n:"Bosphorus",c:"--a-bs"},as:{n:"Asian side",c:"--a-as"},ap:{n:"Airport",c:"--a-ap"}};
+const P=[
+ {id:"hagia-sophia",k:"HS",n:"Hagia Sophia",tr:"Ayasofya-i Kebir Camii",ask:"Ayasofya Camii'ne",a:"sa",ll:[41.0086,28.9802],h:["09:00","19:30"],eur:25,pass:0,mq:"hs",dur:60,
+  exp:"Visitors go up a ramp to the upper gallery: the Deesis, Zoe and Komnenos mosaics, the Marble Door and views down into the prayer hall. The ground floor is for worshippers.",
+  best:"09:00 sharp or after 17:00. The gallery closes 12:00–14:00 on Fridays.",tip:"Visitor gate is opposite the Ahmed III fountain, beside Topkapı's Imperial Gate. Women cover hair (scarf €1 at the booth). Under-8s free. Priced in euros, charged in lira.",go:"T1 Sultanahmet · 4 min",buy:"https://www.getyourguide.com/istanbul-l56/istanbul-hagia-sophia-skip-the-line-ticket-museum-option-t709111/"},
+ {id:"topkapi",k:"TP",n:"Topkapı Palace",tr:"Topkapı Sarayı",ask:"Topkapı Sarayı'na",a:"sa",ll:[41.0113,28.9833],h:["09:00","17:30"],cl:[2],try:2750,note:"Combined ticket: Palace, Harem and Hagia Irene",pass:1,dur:180,
+  exp:"Four courtyards of the Ottoman court: the Treasury (Spoonmaker's Diamond, Topkapı Dagger), the Sacred Relics, the Imperial Council and terraces over the Bosphorus.",
+  best:"At the gate for 09:00, or after 14:00. Weekdays beat weekends.",tip:"Do the Harem first while it's quiet, Treasury second. The audio guide is worth it.",go:"T1 Gülhane · 6 min",buy:"https://www.millisaraylar.gov.tr/Lokasyon/2/Topkapi-Palace"},
+ {id:"harem",k:"HR",n:"Topkapı Harem",tr:"Harem Dairesi",ask:"Topkapı Sarayı Harem Dairesi'ne",a:"sa",ll:[41.0124,28.9840],h:["09:00","17:30"],cl:[2],try:1050,note:"Or in the ₺2,750 combined ticket",pass:1,dur:45,
+  exp:"The sultan's private quarters: tiled corridors, the Imperial Hall, Murad III's Privy Chamber and the Courtyard of the Concubines.",best:"First thing after entering Topkapı.",tip:"Entrance is in Topkapı's second courtyard.",go:"Inside Topkapı"},
+ {id:"hagia-irene",k:"HI",n:"Hagia Irene",tr:"Aya İrini",ask:"Aya İrini'ye",a:"sa",ll:[41.0099,28.9813],h:["09:00","17:30"],cl:[2],try:1050,note:"Or in the ₺2,750 combined ticket",pass:1,dur:25,
+  exp:"A 6th-century church that was never converted to a mosque. Bare brick, an apse cross from the iconoclast era and remarkable acoustics.",best:"On the way into Topkapı.",tip:"In Topkapı's first courtyard, before the ticket gate.",go:"Topkapı first courtyard"},
+ {id:"archaeology",k:"AR",n:"Archaeology Museums",tr:"İstanbul Arkeoloji Müzeleri",ask:"İstanbul Arkeoloji Müzeleri'ne",a:"sa",ll:[41.0117,28.9812],h:["09:00","17:00"],eur:15,pass:1,dur:105,
+  exp:"Three buildings: the main hall with the Alexander Sarcophagus, the Ancient Orient Museum with the Kadesh treaty tablet, and the Tiled Kiosk.",best:"Afternoon, after Topkapı. Rarely crowded.",tip:"Some halls may be under renovation. Garden café is a good break.",go:"T1 Gülhane · 4 min",buy:"https://muze.gov.tr/urun-ekle?catalogNo=WEB-IAR01-87-009"},
+ {id:"islam-science",k:"IS",n:"Science & Technology in Islam",tr:"İslam Bilim ve Teknoloji Tarihi Müzesi",ask:"İslam Bilim ve Teknoloji Tarihi Müzesi'ne",a:"sa",ll:[41.0147,28.9817],h:["09:00","17:00"],eur:10,pass:1,dur:60,
+  exp:"Working replicas of astrolabes, clocks, surgical tools and maps from the 9th–16th centuries, in Gülhane Park's old stables.",best:"Any time. Good with kids and on rainy days.",tip:"Walk through Gülhane Park on the way.",go:"T1 Gülhane · 3 min"},
+ {id:"tiem",k:"TI",n:"Turkish & Islamic Arts",tr:"Türk ve İslam Eserleri Müzesi",ask:"Türk ve İslam Eserleri Müzesi'ne",a:"sa",ll:[41.0062,28.9749],h:["09:00","17:00"],eur:17,pass:1,dur:75,
+  exp:"İbrahim Pasha's palace on the Hippodrome. One of the world's great carpet collections, plus calligraphy, Qur'ans and an ethnography floor.",best:"Midday, while the Blue Mosque closes for prayer.",tip:"The café terrace faces the Blue Mosque.",go:"T1 Sultanahmet · 2 min",buy:"https://muze.gov.tr/urun-ekle?catalogNo=WEB-TIE01-87-009"},
+ {id:"mosaics",k:"MO",n:"Great Palace Mosaics",tr:"Büyük Saray Mozaikleri Müzesi",ask:"Büyük Saray Mozaikleri Müzesi'ne",a:"sa",ll:[41.0047,28.9773],h:["09:00","17:00"],eur:10,pass:1,dur:35,
+  exp:"Floor mosaics from the Byzantine Great Palace (hunts, animals, daily life) shown where they were found.",best:"Any time. Small and quiet.",tip:"Entrance is inside the Arasta Bazaar, behind the Blue Mosque.",go:"T1 Sultanahmet · 5 min",buy:"https://muze.gov.tr/urun-ekle?catalogNo=WEB-MOZ01-87-009"},
+ {id:"turbes",k:"TB",n:"Sultans' Tombs",tr:"Ayasofya Türbeleri",ask:"Ayasofya Türbeleri'ne",a:"sa",ll:[41.0079,28.9795],h:["09:00","17:00"],free:1,pass:1,dur:20,
+  exp:"Mausoleums of five Ottoman sultans with İznik-tiled interiors, in Hagia Sophia's garden.",best:"With Hagia Sophia.",tip:"Shoes off. Free and usually empty.",go:"Beside Hagia Sophia"},
+ {id:"galata-tower",k:"GT",n:"Galata Tower",tr:"Galata Kulesi",ask:"Galata Kulesi'ne",a:"bg",ll:[41.0256,28.9741],h:["08:30","23:00"],eur:30,pass:1,dur:45,
+  exp:"A 14th-century Genoese tower with a narrow 360° balcony over the Golden Horn, the Bosphorus and the old city.",best:"08:30 for no queue. Sunset queues can pass an hour.",tip:"A lift goes most of the way up. The balcony is one-way and narrow.",go:"M2 Şişhane · 8 min",buy:"https://muze.gov.tr/urun-ekle?catalogNo=WEB-GLT03-87-009"},
+ {id:"galata-mevlevi",k:"GM",n:"Galata Mevlevi House",tr:"Galata Mevlevihanesi",ask:"Galata Mevlevihanesi'ne",a:"bg",ll:[41.0282,28.9757],h:["09:00","17:00"],cl:[1],eur:7,pass:1,dur:45,
+  exp:"The 15th-century whirling-dervish lodge: the octagonal semahane, instruments and a quiet cemetery garden.",best:"Weekday mornings.",tip:"Sema ceremonies need a separate ticket.",go:"M2 Şişhane · 4 min",buy:"https://muze.gov.tr/urun-ekle?catalogNo=WEB-GLT01-01-009"},
+ {id:"mickiewicz",k:"AM",n:"Adam Mickiewicz Museum",tr:"Adam Mickiewicz Müzesi",ask:"Adam Mickiewicz Müzesi'ne",a:"bg",ll:[41.0368,28.9748],h:["10:00","16:30"],cl:[1],free:1,pass:1,dur:30,
+  exp:"The small house where the Polish poet died in 1855: letters, portraits and a basement crypt.",best:"Only with a specific interest.",tip:"Hours can be irregular.",go:"M2 Taksim · 12 min"},
+ {id:"rumeli",k:"RH",n:"Rumeli Fortress",tr:"Rumeli Hisarı",ask:"Rumeli Hisarı'na",a:"bs",ll:[41.0848,29.0553],h:["09:00","17:00"],eur:6,pass:1,dur:60,
+  exp:"Mehmed II's 1452 fortress at the Bosphorus's narrowest point. Steep walls, towers and views of the bridge.",best:"Late-afternoon light.",tip:"Steep steps with few railings; wear proper shoes.",go:"Bus 22 or 25E from Kabataş · 30 min",buy:"https://muze.gov.tr/urun-ekle?catalogNo=WEB-HIS01-01-009"},
+ {id:"maidens-tower",k:"MT",n:"Maiden's Tower",tr:"Kız Kulesi",ask:"Kız Kulesi'ne",a:"as",ll:[41.0211,29.0041],h:["09:00","18:00"],eur:32,note:"Includes the boat",pass:1,dur:75,
+  exp:"An islet tower off Üsküdar, reopened in 2023, with exhibition floors and a view back at the old city.",best:"Toward sunset.",tip:"Boats leave from Salacak and Karaköy and stop in rough weather.",go:"Ferry to Üsküdar, walk to Salacak",buy:"https://muze.gov.tr/urun-ekle?catalogNo=WEB-KZK01-87-009"},
+ {id:"fethiye",k:"FE",n:"Fethiye Museum",tr:"Fethiye Müzesi (Pammakaristos)",ask:"Fethiye Müzesi'ne",a:"fb",ll:[41.0296,28.9468],h:null,eur:3,pass:1,shut:"Closed for restoration",dur:30,
+  exp:"A Byzantine side chapel with gold-ground mosaics and a Pantokrator dome.",best:"Check that it has reopened.",tip:"Currently under restoration.",go:"Bus to Fener · 10 min uphill"},
+ {id:"airport",k:"AP",n:"Airport Museum",tr:"İstanbul Havalimanı Müzesi",ask:"Havalimanı Müzesi'ne",a:"ap",ll:[41.2608,28.7424],h:["00:00","24:00"],eur:13,pass:0,dur:30,
+  exp:"A branch museum in international departures with rotating archaeology exhibitions.",best:"Spare time airside.",tip:"Museum Pass not accepted.",go:"Departures, airside"},
+ {x:1,id:"blue-mosque",k:"BM",n:"Blue Mosque",tr:"Sultanahmet Camii",ask:"Sultanahmet Camii'ne",a:"sa",ll:[41.0054,28.9768],h:["08:30","19:00"],free:1,mq:"std",dur:30,
+  exp:"Six minarets and 20,000 İznik tiles. A working mosque; visitors use the side entrance.",best:"Before 11:00, between prayers. Avoid Friday before about 14:30.",tip:"Shoulders and knees covered; scarves are lent at the door.",go:"T1 Sultanahmet · 3 min"},
+ {x:1,id:"basilica-cistern",k:"BC",n:"Basilica Cistern",tr:"Yerebatan Sarnıcı",ask:"Yerebatan Sarnıcı'na",a:"sa",ll:[41.0084,28.9778],h:["09:00","22:00"],try:1950,note:"Day ticket. Evening session 19:30–22:00 is priced separately",pass:0,dur:40,
+  exp:"A 6th-century reservoir of 336 columns, with the two Medusa heads and lit art installations.",best:"At opening, or the evening session.",tip:"Municipal site; Museum Pass not accepted.",go:"T1 Sultanahmet · 2 min",url:"https://yerebatan.com"},
+ {x:1,id:"theodosius",k:"TC",n:"Theodosius Cistern",tr:"Şerefiye Sarnıcı",ask:"Şerefiye Sarnıcı'na",a:"sa",ll:[41.0082,28.9727],h:["09:00","18:00"],pass:0,dur:20,
+  exp:"A smaller 5th-century cistern with a projection show. The quiet alternative to the Basilica Cistern.",best:"Any time.",tip:"Timed entry.",go:"T1 Çemberlitaş · 4 min"},
+ {x:1,id:"suleymaniye",k:"SU",n:"Süleymaniye Mosque",tr:"Süleymaniye Camii",ask:"Süleymaniye Camii'ne",a:"gh",ll:[41.0162,28.9640],h:["08:30","19:00"],free:1,mq:"std",dur:45,
+  exp:"Sinan's masterpiece on the third hill. Calmer than the Blue Mosque, with Süleyman's and Hürrem's tombs and a terrace over the Golden Horn.",best:"Morning, then the terrace.",tip:"Bean stew (kuru fasulye) on the street below is a local lunch institution.",go:"Uphill from Eminönü · 12 min"},
+ {x:1,id:"rustem-pasa",k:"RP",n:"Rüstem Paşa Mosque",tr:"Rüstem Paşa Camii",ask:"Rüstem Paşa Camii'ne",a:"gh",ll:[41.0175,28.9688],h:["08:30","19:00"],free:1,mq:"std",dur:20,
+  exp:"A small Sinan mosque above market shops, lined with the finest İznik tiles in the city.",best:"Between prayers.",tip:"The stairs are hidden among shops on Hasırcılar street.",go:"T1 Eminönü · 5 min"},
+ {x:1,id:"grand-bazaar",k:"GB",n:"Grand Bazaar",tr:"Kapalıçarşı",ask:"Kapalıçarşı'ya",a:"gh",ll:[41.0107,28.9681],h:["09:00","19:00"],cl:[0],free:1,dur:60,
+  exp:"Over 60 covered streets. Treat it as a walk rather than a shopping list.",best:"Weekday mornings.",tip:"Enter at Nuruosmaniye gate and leave toward Süleymaniye.",go:"T1 Beyazıt"},
+ {x:1,id:"spice-bazaar",k:"SB",n:"Spice Bazaar",tr:"Mısır Çarşısı",ask:"Mısır Çarşısı'na",a:"gh",ll:[41.0166,28.9706],h:["08:00","19:30"],free:1,dur:30,
+  exp:"The 17th-century Egyptian Bazaar. The streets around it are where locals actually shop.",best:"Before 10:00.",tip:"Leave from the west side toward Rüstem Paşa.",go:"T1 Eminönü"},
+ {x:1,id:"chora",k:"CH",n:"Chora Mosque",tr:"Kariye Camii",ask:"Kariye Camii'ne",a:"fb",ll:[41.0312,28.9393],h:["09:00","18:00"],eur:20,pass:0,mq:"std",dur:45,
+  exp:"The finest late-Byzantine mosaics and frescoes anywhere, in the narthex and side chapel. A mosque again since 2024.",best:"Morning. Friday access may be limited.",tip:"Pair with a walk down through Balat.",go:"Bus to Edirnekapı · 5 min"},
+ {x:1,id:"rahmi-koc",k:"RK",n:"Rahmi M. Koç Museum",tr:"Rahmi M. Koç Müzesi",ask:"Rahmi M. Koç Müzesi'ne",a:"fb",ll:[41.0423,28.9497],h:["09:30","17:00"],cl:[1],try:950,pass:0,dur:120,
+  exp:"Trains, ships, a submarine and classic cars in an old anchor foundry on the Golden Horn.",best:"Great with kids.",tip:"Open later at weekends.",go:"Golden Horn ferry to Hasköy",url:"https://www.rmk-museum.org.tr"},
+ {x:1,id:"istanbul-modern",k:"IM",n:"Istanbul Modern",tr:"İstanbul Modern",ask:"İstanbul Modern'e",a:"bg",ll:[41.0267,28.9833],h:["10:00","18:00"],cl:[1],try:900,pass:0,dur:90,
+  exp:"Renzo Piano's waterfront building with Turkish modern and contemporary art and photography.",best:"Late afternoon. Fridays until 20:00.",tip:"The terrace sits right on the water.",go:"T1 Tophane",url:"https://www.istanbulmodern.org"},
+ {x:1,id:"pera",k:"PM",n:"Pera Museum",tr:"Pera Müzesi",ask:"Pera Müzesi'ne",a:"bg",ll:[41.0318,28.9750],h:["10:00","19:00"],cl:[1],try:300,pass:0,dur:60,
+  exp:"Orientalist painting including Osman Hamdi Bey's The Tortoise Trainer, Kütahya ceramics and strong temporary shows.",best:"Any afternoon. Sundays 12:00–18:00.",tip:"The best-value museum in the city.",go:"M2 Şişhane · 3 min",url:"https://www.peramuzesi.org.tr"},
+ {x:1,id:"innocence",k:"MI",n:"Museum of Innocence",tr:"Masumiyet Müzesi",ask:"Masumiyet Müzesi'ne",a:"bg",ll:[41.0307,28.9802],h:["10:00","18:00"],cl:[1],pass:0,dur:60,
+  exp:"Orhan Pamuk's museum of a fictional love story: 83 cabinets of everyday Istanbul objects.",best:"With the Çukurcuma antique streets.",tip:"Read a few pages of the novel first.",go:"T1 Tophane · 8 min uphill",url:"https://www.masumiyetmuzesi.org"},
+ {x:1,id:"dolmabahce",k:"DB",n:"Dolmabahçe Palace",tr:"Dolmabahçe Sarayı",ask:"Dolmabahçe Sarayı'na",a:"bs",ll:[41.0391,29.0004],h:["09:00","17:30"],cl:[1],try:2000,note:"Combined ticket",pass:0,dur:120,
+  exp:"The 19th-century European-style palace: the crystal staircase, a 4.5-tonne chandelier and Atatürk's room.",best:"At opening.",tip:"Interior photography is restricted. Museum Pass not accepted.",go:"T1 Kabataş · 6 min",url:"https://www.millisaraylar.gov.tr"},
+ {x:1,id:"sabanci",k:"SS",n:"Sakıp Sabancı Museum",tr:"Sakıp Sabancı Müzesi",ask:"Sakıp Sabancı Müzesi'ne",a:"bs",ll:[41.1068,29.0548],h:["10:00","18:00"],cl:[1],try:450,pass:0,dur:90,
+  exp:"A Bosphorus villa with calligraphy, painting and large touring exhibitions; waterside café.",best:"With Rumeli Fortress.",tip:"Reportedly free on Tuesdays; confirm before going.",go:"Bus 22 or 25E · Emirgan",url:"https://www.sakipsabancimuzesi.org"},
+ {x:1,id:"beylerbeyi",k:"BB",n:"Beylerbeyi Palace",tr:"Beylerbeyi Sarayı",ask:"Beylerbeyi Sarayı'na",a:"as",ll:[41.0430,29.0410],h:["09:00","17:00"],cl:[1],try:800,pass:0,dur:60,
+  exp:"An Ottoman summer palace on the Asian shore, right under the Bosphorus Bridge.",best:"Late morning.",tip:"Museum Pass not accepted.",go:"Bus from Üsküdar · 10 min",url:"https://www.millisaraylar.gov.tr"},
+];
+const ROUTES=[
+ {id:"1",n:"Old City, light",a:"sa",meta:"Half day · 1.5 km",mode:"walking",d:"The essentials without museum fatigue: Hagia Sophia, the Hippodrome and one museum through lunch. Leave Topkapı for its own morning.",
+  s:[["hagia-sophia","09:00 · first in"],["blue-mosque","10:15 · before noon prayer"],"Walk the Hippodrome",["mosaics","11:00"],["tiem","11:45 · terrace lunch"],["basilica-cistern","14:00 · end underground"]]},
+ {id:"2",n:"Topkapı, properly",a:"sa",meta:"Half day · 1 km",mode:"walking",avoid:[2],d:"The palace takes three hours. Give it a fresh morning, then the quiet museums next door.",
+  s:[["hagia-irene","09:00 · first courtyard"],["harem","09:20 · before the queue"],["topkapi","10:15 · Treasury, Relics, terraces"],"Lunch on the palace terrace or in Gülhane",["archaeology","14:00"],["islam-science","15:45 · if energy left"]]},
+ {id:"3",n:"Rainy day",a:"sa",meta:"Full day · all indoors",mode:"walking",d:"Under cover from 09:00 to dusk, with only a few minutes between doors.",
+  s:[["archaeology","09:00"],["islam-science","11:00"],["basilica-cistern","12:30"],["tiem","13:30"],["grand-bazaar","15:15 · 60 covered streets"]]},
+ {id:"4",n:"Free day",a:"gh",meta:"Full day · 3 km · ₺0",mode:"walking",avoid:[0],d:"No tickets: Sinan's mosques, the tombs and both bazaars. Time it around prayers.",
+  s:[["spice-bazaar","08:30"],["rustem-pasa","09:15"],["suleymaniye","10:00 · terrace view"],"Bean-stew lunch below Süleymaniye",["grand-bazaar","13:00"],["blue-mosque","15:00 · after Asr"],["turbes","16:00"]]},
+ {id:"5",n:"Balat & Chora",a:"fb",meta:"Full day · bus + ferry",mode:"transit",avoid:[1],d:"Byzantine mosaics in the morning, Balat's colourful streets downhill, then a ferry along the Golden Horn.",
+  s:[["chora","09:30 · before groups"],"Walk downhill through Balat, 25 min",["fethiye","Check if reopened"],"Golden Horn ferry Balat → Hasköy",["rahmi-koc","13:30"]]},
+ {id:"6",n:"Galata to sunset",a:"bg",meta:"Afternoon · 2.5 km",mode:"walking",avoid:[1],d:"Downhill through Beyoğlu, ending on the water or up the tower as the light goes.",
+  s:[["pera","12:30"],["galata-mevlevi","13:45"],["innocence","14:45"],["istanbul-modern","16:00"],["galata-tower","17:15 · queue for sunset"]]},
+ {id:"7",n:"Bosphorus & Asia",a:"bs",meta:"Full day · bus + ferry",mode:"transit",avoid:[1],d:"Palace at opening, the shore road north, then cross to Asia for Maiden's Tower at sunset. Public ferries beat tour boats.",
+  s:[["dolmabahce","09:00"],"Bus 22 or 25E up the shore",["rumeli","12:00"],["sabanci","13:30 · lunch in Emirgan"],"Ferry or bus to Üsküdar",["maidens-tower","16:45"]]},
+ {id:"M",n:"Monday plan",a:"sa",meta:"Full day · tram",mode:"transit",best:[1],d:"Palaces, private museums and the Mevlevi House close on Mondays. These don't.",
+  s:[["topkapi","09:00"],["harem","10:30"],["archaeology","13:30"],["basilica-cistern","15:30"],"T1 to Karaköy",["galata-tower","17:00 · sunset"]]},
+ {id:"T",n:"Tuesday plan",a:"bs",meta:"Full day · tram",mode:"transit",best:[2],d:"Topkapı is shut on Tuesdays, so go across the water instead.",
+  s:[["dolmabahce","09:00"],"T1 Kabataş → Tophane",["istanbul-modern","12:00"],["pera","14:00"],["galata-mevlevi","15:15"],["galata-tower","16:30"]]},
+];
+const RAIL=[
+ {k:"T1",pts:[[41.0335,28.9935],[41.0300,28.9890],[41.0268,28.9825],[41.0228,28.9770],[41.0172,28.9722],[41.0150,28.9770],[41.0130,28.9800],[41.0083,28.9775],[41.0085,28.9715],[41.0105,28.9640],[41.0090,28.9555],[41.0065,28.9480],[41.0085,28.9380]],lab:[41.0098,28.9600]},
+ {k:"M2",pts:[[41.0045,28.9510],[41.0130,28.9590],[41.0230,28.9625],[41.0280,28.9720],[41.0370,28.9860],[41.0480,28.9870],[41.0600,28.9880]],lab:[41.0255,28.9670]},
+ {k:"F1",pts:[[41.0335,28.9935],[41.0370,28.9860]],lab:[41.0352,28.9897]},
+ {k:"Marmaray",pts:[[41.0045,28.9510],[41.0145,28.9770],[41.0255,29.0150],[41.0010,29.0310]],lab:[41.0200,28.9960]},
+ {f:1,pts:[[41.0175,28.9745],[41.0265,29.0135]]},{f:1,pts:[[41.0225,28.9780],[40.9925,29.0210]]},{f:1,pts:[[41.0340,28.9955],[41.0265,29.0135]]},{f:1,pts:[[41.0215,29.0075],[41.0211,29.0045]]},{f:1,pts:[[41.0185,28.9700],[41.0300,28.9520],[41.0420,28.9500]]},
+];
+const LABELS=[["Sultanahmet",41.0058,28.9812],["Beyoğlu",41.0350,28.9800],["Karaköy",41.0235,28.9800],["Fatih",41.0190,28.9470],["Beşiktaş",41.0440,29.0080],["Üsküdar",41.0275,29.0230],["Kadıköy",40.9910,29.0310],["Balat",41.0350,28.9440],
+ ["Golden Horn",41.0315,28.9590,1],["Bosphorus",41.0560,29.0350,1],["Sea of Marmara",40.9960,28.9800,1]];
+
+const $=s=>document.querySelector(s);
+const esc=s=>String(s??"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const byId=Object.fromEntries(P.map(p=>[p.id,p]));
+const st={get(k,d){try{const v=localStorage.getItem(k);return v==null?d:JSON.parse(v)}catch(e){return d}},set(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}};
+const S={visited:new Set(st.get("im-v",[])),extras:st.get("im-x",true),transit:st.get("im-t",true),dark:st.get("im-d",false)};
+const DOW=["Sun","Mon","Tue","Wed","Thu","Fri","Sat"],DOWL=["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"];
+const m2=s=>{const[a,b]=s.split(":").map(Number);return a*60+b};
+const fmt=m=>{m=((Math.round(m)%1440)+1440)%1440;return String(Math.floor(m/60)).padStart(2,"0")+":"+String(m%60).padStart(2,"0")};
+const ist=()=>{const d=new Date();return new Date(d.getTime()+d.getTimezoneOffset()*6e4+3*36e5)};
+let at=null;
+function moment(){const n=ist();if(!at)return{d:n,min:n.getHours()*60+n.getMinutes(),live:1,off:0};const d=new Date(n);d.setDate(d.getDate()+at.day);return{d,min:at.min,live:0,off:at.day}}
+const usd=p=>p.eur?p.eur*FX.eurUsd:p.try?p.try/FX.usdTry:0;
+const price=p=>p.free?"Free":p.eur?"€"+p.eur:p.try?"₺"+p.try.toLocaleString("en-US"):"Ticketed";
+const usdS=p=>{const u=usd(p);return u?"$"+Math.round(u):""};
+const col=a=>`var(${AREA[a].c})`;
+const bullet=p=>`<span class="b${p.x?" x":""}${AREA[p.a].y?" y":""}" style="background:${col(p.a)}"><span>${p.k}</span></span>`;
+const passTag=p=>p.free?"":p.pass?'<span class="tag p">PASS</span>':'<span class="tag n">NO PASS</span>';
+let toastT;function toast(t){const e=$("#toast");e.textContent=t;e.hidden=false;clearTimeout(toastT);toastT=setTimeout(()=>e.hidden=true,3800)}
+
+function prayer(date){
+  const R=Math.PI/180,lat=41.0082*R,lng=28.9784,tz=3,y=date.getFullYear(),mo=date.getMonth()+1,da=date.getDate();
+  const A=Math.floor((14-mo)/12),Y=y+4800-A,M=mo+12*A-3;
+  const D=da+Math.floor((153*M+2)/5)+365*Y+Math.floor(Y/4)-Math.floor(Y/100)+Math.floor(Y/400)-32045-2451545;
+  const g=(357.529+.98560028*D)*R,q=280.459+.98564736*D,L=(q+1.915*Math.sin(g)+.02*Math.sin(2*g))*R,e=(23.439-3.6e-7*D)*R;
+  let ra=Math.atan2(Math.cos(e)*Math.sin(L),Math.cos(L))/R/15;ra=(ra%24+24)%24;
+  const dec=Math.asin(Math.sin(e)*Math.sin(L));let eq=(q/15%24+24)%24-ra;if(eq>12)eq-=24;if(eq<-12)eq+=24;
+  const noon=12+tz-lng/15-eq,T=a=>Math.acos((-Math.sin(a*R)-Math.sin(dec)*Math.sin(lat))/(Math.cos(dec)*Math.cos(lat)))/R/15;
+  const asr=-Math.atan(1/(1+Math.tan(Math.abs(lat-dec))))/R;
+  return{Fajr:(noon-T(18))*60,Sunrise:(noon-T(.833))*60-7,Dhuhr:noon*60+5,Asr:(noon+T(asr))*60+4,Maghrib:(noon+T(.833))*60+7,Isha:(noon+T(17))*60+1,sunset:(noon+T(.833))*60};
+}
+function blocks(p,d){
+  if(!p.mq)return[];const pt=prayer(d),fri=d.getDay()===5;
+  if(p.mq==="hs")return fri?[[720,840]]:[];
+  const b=[[pt.Dhuhr-15,pt.Dhuhr+45],[pt.Asr-15,pt.Asr+40],[pt.Maghrib-15,pt.Maghrib+40]];
+  if(fri)b[0]=[Math.min(pt.Dhuhr-90,690),Math.max(pt.Dhuhr+75,870)];return b;
+}
+function windows(p,d){if(!p.h)return[];const o=m2(p.h[0]),c=m2(p.h[1]),out=[];let cur=o;
+  for(const[a,b]of blocks(p,d)){if(a>cur&&a<c)out.push([cur,a]);cur=Math.max(cur,b)}if(cur<c)out.push([cur,c]);return out}
+function status(p,M=moment()){
+  const{d,min}=M;
+  if(p.shut)return{c:"closed",t:p.shut,open:0};
+  if(!p.h)return{c:"",t:"",open:0};
+  if(p.h[0]==="00:00")return{c:"open",t:"Open 24 h",open:1};
+  if(p.cl&&p.cl.includes(d.getDay()))return{c:"closed",t:"Closed "+DOWL[d.getDay()]+"s",open:0};
+  const o=m2(p.h[0]),c=m2(p.h[1]);
+  if(min<o)return{c:"closed",t:"Opens "+p.h[0],open:0};
+  if(min>=c)return{c:"closed",t:"Closed · opens "+p.h[0],open:0};
+  for(const[a,b]of blocks(p,d))if(min>=a&&min<b)return{c:"warn",t:"Prayer · back ~"+fmt(b),open:0};
+  const nb=blocks(p,d).find(([a])=>a>min&&a-min<=45);if(nb)return{c:"warn",t:"Prayer closure ~"+fmt(nb[0]),open:1};
+  if(c-min<=60)return{c:"warn",t:"Closes "+p.h[1],open:1};
+  return{c:"open",t:"Open until "+p.h[1],open:1};
+}
+const apple=p=>`https://maps.apple.com/?q=${encodeURIComponent(p.n)}&ll=${p.ll[0]},${p.ll[1]}&dirflg=w`;
+const google=p=>`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(p.n+", Istanbul")}`;
+const stops=r=>r.s.filter(s=>Array.isArray(s));
+const gRoute=r=>{const ps=stops(r).map(([i])=>byId[i]).filter(p=>!p.shut),q=p=>encodeURIComponent(p.n+", Istanbul");
+  return`https://www.google.com/maps/dir/?api=1&origin=${q(ps[0])}&destination=${q(ps.at(-1))}&waypoints=${ps.slice(1,-1).map(q).join("%7C")}&travelmode=${r.mode}`};
+let myLL=null;
+function dist(ll){if(!myLL)return null;const R=6371,t=Math.PI/180,dl=(ll[0]-myLL[0])*t,dn=(ll[1]-myLL[1])*t,a=Math.sin(dl/2)**2+Math.cos(myLL[0]*t)*Math.cos(ll[0]*t)*Math.sin(dn/2)**2;return 2*R*Math.asin(Math.sqrt(a))}
+const distS=ll=>{const d=dist(ll);if(d==null||d>40)return"";const w=Math.round(d*1.3/4.8*60);return d<1?Math.round(d*1000)+" m":(d<10?d.toFixed(1):Math.round(d))+" km"}
+
+const tok=n=>getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+const map=L.map("map",{zoomControl:false,attributionControl:false,preferCanvas:true,minZoom:10,maxZoom:18,zoomSnap:.5,maxBounds:[[40.75,28.5],[41.40,29.40]],maxBoundsViscosity:.9}).setView([41.0155,28.979],14.5);
+map.createPane("vec");map.getPane("vec").style.zIndex=150;
+const R=L.canvas({pane:"vec",padding:.5}),Rtop=L.canvas({padding:.5});
+const vec=L.layerGroup().addTo(map),railL=L.layerGroup(),pinL=L.layerGroup().addTo(map),labelL=L.layerGroup().addTo(map);
+let baseLayers=[],mahLayer=null,railLines=[],tiles=null,tilesOK=false;
+function setTiles(){
+  tiles&&tiles.remove();
+  tiles=L.tileLayer(`https://{s}.basemaps.cartocdn.com/${S.dark?"dark_all":"light_all"}/{z}/{x}/{y}{r}.png`,{subdomains:"abcd",maxZoom:19,detectRetina:false,crossOrigin:true}).addTo(map);
+  tiles.once("tileload",()=>{tilesOK=true;labelL.remove();$("#attr").textContent="© OpenStreetMap · © CARTO"});
+}
+fetch("map.json").then(r=>r.json()).then(g=>{
+  g.base.forEach(ring=>baseLayers.push(L.polygon(ring.map(([x,y])=>[y,x]),{renderer:R,interactive:false,stroke:false,fillOpacity:1}).addTo(vec)));
+  mahLayer=L.polygon(g.mah.map(mp=>mp.map(poly=>poly.map(r=>r.map(([x,y])=>[y,x])))),{renderer:R,interactive:false,weight:.6,fillOpacity:1}).addTo(vec);restyle();
+}).catch(()=>{});
+RAIL.forEach(l=>{const pl=L.polyline(l.pts,{renderer:Rtop,interactive:false,weight:l.f?1.5:3,dashArray:l.f?"3 5":null,lineCap:"round"});railLines.push(pl);pl.addTo(railL);
+  if(l.lab)L.marker(l.lab,{interactive:false,icon:L.divIcon({className:"",html:`<div class="tl">${l.k}</div>`,iconSize:[0,0]})}).addTo(railL)});
+LABELS.forEach(([t,a,b,w])=>L.marker([a,b],{interactive:false,icon:L.divIcon({className:"",html:`<div class="alabel${w?" w":""}">${t}</div>`,iconSize:[0,0]})}).addTo(labelL));
+function restyle(){
+  baseLayers.forEach(l=>l.setStyle({fillColor:tok("--land")}));
+  mahLayer&&mahLayer.setStyle({fillColor:tok("--land"),color:tok("--mah")});
+  railLines.forEach(pl=>pl.setStyle({color:tok("--rail"),opacity:.85}));
+  if(routeLine)routeLine.setStyle({color:tok(AREA[activeRoute.a].c)});
+}
+function applyTheme(){document.documentElement.dataset.mode=S.dark?"dark":"light";document.querySelector('meta[name="theme-color"]').content=S.dark?"#0b0b0b":"#ffffff";restyle();setTiles()}
+let sel=null,activeRoute=null,routeLine=null,me=null,acc=null;
+function drawPins(){
+  pinL.clearLayers();const M=moment();
+  for(const p of P){
+    const inR=activeRoute?stops(activeRoute).findIndex(s=>s[0]===p.id):-1;
+    if(p.x&&!S.extras&&inR<0)continue;
+    const s=status(p,M),cls=["mk",s.open?"":"off",activeRoute&&inR<0?"dim":"",sel===p.id?"sel":""].join(" "),sz=p.x?26:26;
+    const m=L.marker(p.ll,{title:p.n,keyboard:true,zIndexOffset:sel===p.id?1000:inR>-1?500:p.x?0:200,icon:L.divIcon({className:"",iconSize:[sz,sz],iconAnchor:[sz/2,sz/2],
+      html:`<div class="${cls}">${bullet(p)}${inR>-1?`<span class="no">${inR+1}</span>`:""}</div>`})});
+    m.on("click",()=>openPlace(p.id));pinL.addLayer(m);
+  }
+}
+$("#bIn").onclick=()=>map.zoomIn();$("#bOut").onclick=()=>map.zoomOut();
+let watch=null,follow=false;
+$("#bLoc").onclick=()=>{
+  const b=$("#bLoc");
+  if(watch!==null){if(myLL&&!follow){follow=true;map.flyTo(myLL,16,{duration:.5});return}navigator.geolocation.clearWatch(watch);watch=null;myLL=null;me&&me.remove();acc&&acc.remove();me=acc=null;b.setAttribute("aria-pressed","false");render();return}
+  if(!navigator.geolocation)return toast("Location isn't available in this browser.");
+  b.setAttribute("aria-pressed","true");follow=true;
+  watch=navigator.geolocation.watchPosition(pos=>{myLL=[pos.coords.latitude,pos.coords.longitude];
+    if(!me){me=L.marker(myLL,{interactive:false,zIndexOffset:2000,icon:L.divIcon({className:"",html:'<div class="me"></div>',iconSize:[18,18]})}).addTo(map);acc=L.circle(myLL,{renderer:Rtop,radius:pos.coords.accuracy,stroke:false,fillColor:"#1a73e8",fillOpacity:.12,interactive:false}).addTo(map);if(!detail&&tab==="places"){filter="near";render()}}
+    else{me.setLatLng(myLL);acc.setLatLng(myLL).setRadius(pos.coords.accuracy)}
+    if(follow){map.flyTo(myLL,Math.max(map.getZoom(),16),{duration:.5});follow=false}
+    if(!detail&&tab==="places")render()},
+   err=>{b.setAttribute("aria-pressed","false");watch=null;toast(err.code===1?"Location permission is off. Allow it in your browser settings.":"Couldn't get your location.")},{enableHighAccuracy:true,maximumAge:15000});
+};
+map.on("dragstart",()=>follow=false);
+
+const sheet=$("#sheet"),body=$("#body");let tab="places",detail=null,filter="all",snap=1;
+const desk=()=>matchMedia("(min-width:860px)").matches;
+const snaps=()=>{const H=sheet.offsetHeight;return[H-112,H-Math.round(innerHeight*.5),0]};
+function setSnap(i){snap=Math.max(0,Math.min(2,i));if(!desk())sheet.style.transform=`translateY(${snaps()[snap]}px)`}
+(()=>{const g=$("#grab");let y0=null,t0,mv;
+ g.onpointerdown=e=>{if(desk())return;y0=e.clientY;t0=snaps()[snap];mv=0;sheet.classList.add("drag");g.setPointerCapture(e.pointerId)};
+ g.onpointermove=e=>{if(y0==null)return;const dy=e.clientY-y0;if(Math.abs(dy)>4)mv=1;sheet.style.transform=`translateY(${Math.max(0,t0+dy)}px)`};
+ g.onpointerup=e=>{if(y0==null)return;sheet.classList.remove("drag");const c=t0+e.clientY-y0;if(!mv)setSnap(snap===2?0:snap+1);else{const s=snaps();let b=0;s.forEach((v,i)=>{if(Math.abs(v-c)<Math.abs(s[b]-c))b=i});setSnap(b)}y0=null};
+})();
+addEventListener("resize",()=>setSnap(snap));
+$("#bSearch").onclick=()=>{const s=$("#srch"),on=s.hidden;s.hidden=!on;$("#bSearch").setAttribute("aria-pressed",on);if(on){if(tab!=="places")setTab("places");setSnap(2);$("#q").focus()}else{$("#q").value="";render()}};
+$("#q").oninput=()=>{detail=null;render()};
+document.querySelectorAll(".tabs button").forEach(b=>b.onclick=()=>setTab(b.dataset.t));
+function setTab(t){tab=t;detail=null;sel=null;document.querySelectorAll(".tabs button").forEach(b=>b.setAttribute("aria-selected",b.dataset.t===t));if(t!=="routes")clearRoute();else drawPins();if(snap===0)setSnap(1);render();body.scrollTop=0}
+
+function rowHtml(p,M){
+  const s=status(p,M),ds=distS(p.ll);
+  return`<button class="row" data-id="${p.id}">${bullet(p)}<span class="rt">
+   <span class="l1"><b>${esc(p.n)}${S.visited.has(p.id)?' <span class="chk">✓</span>':""}</b><span class="pr">${price(p)}${usd(p)?` <em>${usdS(p)}</em>`:""}</span></span>
+   <span class="l2"><small><span class="s-${s.c}">${esc(s.t)}</span> · ${ds?ds+" · ":""}${esc(p.tr)}</small>${passTag(p)}</span></span></button>`;
+}
+function renderPlaces(){
+  const q=$("#q").value.trim().toLocaleLowerCase("tr"),M=moment();
+  let list=P.filter(p=>!p.x||S.extras||q);
+  if(q)list=list.filter(p=>(p.n+" "+p.tr+" "+AREA[p.a].n+" "+p.k).toLocaleLowerCase("tr").includes(q));
+  const f={open:p=>status(p,M).open,pass:p=>p.pass,nopass:p=>!p.pass&&!p.free,free:p=>p.free,todo:p=>!S.visited.has(p.id)}[filter];if(f)list=list.filter(f);
+  const F=[...(myLL?[["near","Nearby"]]:[]),["all","All"],["open",M.live?"Open now":"Open at "+fmt(M.min)],["pass","Pass"],["nopass","No pass"],["free","Free"],["todo","Not visited"]];
+  if(filter==="near"&&!myLL)filter="all";
+  let h=`<div class="chips">${F.map(([k,t])=>`<button class="chip" data-f="${k}" aria-pressed="${filter===k}">${t}</button>`).join("")}</div>`;
+  if(!list.length)h+=`<div class="empty">Nothing matches.</div>`;
+  else if(filter==="near"){h+=`<div class="gh">Closest first</div>`+list.slice().sort((a,b)=>dist(a.ll)-dist(b.ll)).map(p=>rowHtml(p,M)).join("")}
+  else{const g={};list.forEach(p=>(g[p.a]=g[p.a]||[]).push(p));
+    for(const k of Object.keys(AREA).filter(k=>g[k]))h+=`<div class="gh"><i style="background:${col(k)}"></i>${AREA[k].n}<span>${g[k].length}</span></div>${g[k].map(p=>rowHtml(p,M)).join("")}`}
+  h+=`<p class="foot">● State museum &nbsp;◆ Also worth it. Grey pins are closed${M.live?" now":" at "+fmt(M.min)}. Dollar amounts are approximate. Winter hours; last entry is usually 30–60 min before closing.</p>`;
+  body.innerHTML=h;
+  body.querySelectorAll(".chip").forEach(c=>c.onclick=()=>{filter=c.dataset.f;render()});
+}
+function openPlace(id){
+  const p=byId[id];if(!p)return;
+  if(p.x&&!S.extras){S.extras=true;st.set("im-x",true)}
+  detail=id;sel=id;drawPins();render();body.scrollTop=0;
+  if(!desk()&&snap<1)setSnap(1);
+  const z=Math.max(map.getZoom(),15.5),off=desk()?L.point(-200,0):L.point(0,innerHeight*.22);
+  map.flyTo(map.unproject(map.project(p.ll,z).add(off),z),z,{duration:.45});
+  try{history.replaceState(null,"","#"+id)}catch(e){}
+}
+const I={
+ back:'<svg class="i" viewBox="0 0 24 24"><path d="m15 5-7 7 7 7"/></svg>',
+ apple:'<svg class="i" viewBox="0 0 24 24"><path d="M3 11 21 3l-8 18-2-8z"/></svg>',
+ pin:'<svg class="i" viewBox="0 0 24 24"><path d="M12 21s-7-6.2-7-11.5a7 7 0 0 1 14 0C19 14.8 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.4"/></svg>',
+ tix:'<svg class="i" viewBox="0 0 24 24"><path d="M4 7h16v3a2 2 0 0 0 0 4v3H4v-3a2 2 0 0 0 0-4z"/></svg>',
+ web:'<svg class="i" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path d="M3.5 12h17M12 3.5c2.5 2.6 2.5 14.4 0 17M12 3.5c-2.5 2.6-2.5 14.4 0 17"/></svg>',
+ share:'<svg class="i" viewBox="0 0 24 24"><path d="M12 15V3M7.5 7.5 12 3l4.5 4.5M5 12v8h14v-8"/></svg>',
+ check:'<svg class="i" viewBox="0 0 24 24"><path d="m5 12.5 4.5 4.5L19 7.5"/></svg>',
+ dir:'<svg class="i" viewBox="0 0 24 24"><path d="M12 3 21 12l-9 9-9-9z"/><path d="M9 13v-2h5V9l2.5 2.5L14 14v-2"/></svg>',
+ x:'<svg class="i" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"/></svg>',
+ expand:'<svg class="i" viewBox="0 0 24 24"><path d="M14 4h6v6M10 20H4v-6M20 4l-7 7M4 20l7-7"/></svg>',
+};
+async function share(title,url){
+  try{if(navigator.share){await navigator.share({title,url});return}}catch(e){if(e.name==="AbortError")return}
+  try{await navigator.clipboard.writeText(url);toast("Link copied")}catch(e){toast(url)}
+}
+function hoursBar(p,d,M){
+  const S0=360,S1=1440,pc=m=>(Math.max(0,Math.min(1,(m-S0)/(S1-S0)))*100).toFixed(2);
+  return`<div class="bars">${windows(p,d).map(([a,b])=>`<i style="left:${pc(a)}%;width:${pc(b)-pc(a)}%"></i>`).join("")}${M.min>=S0?`<u style="left:${pc(M.min)}%"></u>`:""}</div><div class="scale"><span>06</span><span>10</span><span>14</span><span>18</span><span>22</span><span>24</span></div>`;
+}
+function renderDetail(){
+  const p=byId[detail],M=moment(),s=status(p,M),closedDay=p.cl&&p.cl.includes(M.d.getDay()),ds=distS(p.ll);
+  const tix=p.buy?["Tickets",p.buy,I.tix]:p.url?["Website",p.url,I.web]:null,dayLbl=M.live?"today":DOW[M.d.getDay()];
+  body.innerHTML=`<div class="top"><button class="ib" id="back" aria-label="Back">${I.back}</button></div>
+  <div class="dh">${bullet(p)}<div><h2>${esc(p.n)}</h2><p>${esc(p.tr)}</p><p><span class="s-${s.c}" style="font-weight:600">${esc(s.t)}</span>${ds?" · "+ds+" away":""}</p></div></div>
+  <div class="acts">
+   <a class="act" href="${apple(p)}" target="_blank" rel="noopener"><span>${I.apple}</span>Apple Maps</a>
+   <a class="act" href="${google(p)}" target="_blank" rel="noopener"><span>${I.pin}</span>Google</a>
+   ${tix?`<a class="act" href="${tix[1]}" target="_blank" rel="noopener"><span>${tix[2]}</span>${tix[0]}</a>`:`<span class="act" aria-disabled="true" style="opacity:.4"><span>${I.tix}</span>At door</span>`}
+   <button class="act" id="share"><span>${I.share}</span>Share</button>
+   <button class="act${S.visited.has(p.id)?" on":""}" id="vis" aria-pressed="${S.visited.has(p.id)}"><span>${I.check}</span>${S.visited.has(p.id)?"Visited":"Mark"}</button>
+  </div>
+  <div class="facts">
+   <div class="fact"><small>Ticket</small><b>${price(p)}${usd(p)?` <span style="color:var(--fg2);font-weight:500">≈ ${usdS(p)}</span>`:""}</b><em>${p.free?"No ticket needed":p.pass?"Museum Pass accepted":"Museum Pass not accepted"}</em></div>
+   <div class="fact"><small>Hours</small><b>${p.shut?"Closed":p.h[0]==="00:00"?"24 h":p.h[0]+"–"+p.h[1]}</b><em>${p.shut?"Restoration":p.cl?"Closed "+p.cl.map(x=>DOWL[x]+"s").join(", "):"Every day"}</em></div>
+   <div class="fact"><small>Allow</small><b>${p.dur>=60?(p.dur/60).toFixed(p.dur%60?1:0)+" h":p.dur+" min"}</b><em>${p.x?"◆ Also worth it":"● State museum"}</em></div>
+   <div class="fact"><small>Getting there</small><b style="font-size:14.5px;line-height:1.3">${esc(p.go)}</b></div>
+   ${p.h&&!p.shut&&!closedDay&&p.h[0]!=="00:00"?`<div class="fact w"><small>${p.mq?"Visitor windows "+dayLbl+" (approx.)":"Open "+dayLbl}</small>${hoursBar(p,M.d,M)}</div>`:""}
+  </div>
+  ${p.note?`<p class="foot" style="margin:0 0 8px">${esc(p.note)}</p>`:""}
+  <button class="ask" id="ask" aria-label="Show this question full screen"><div><small>Ask a local</small><b lang="tr">${esc(p.ask)} nasıl gidebilirim?</b><em>How do I get to ${esc(p.n)}?</em></div>${I.expand}</button>
+  <div class="txt"><h3>What to expect</h3><p>${esc(p.exp)}</p></div>
+  <div class="txt"><h3>Best time</h3><p>${esc(p.best)}</p></div>
+  <div class="txt"><h3>Good to know</h3><p>${esc(p.tip)}</p></div>`;
+  $("#back").onclick=()=>{detail=null;sel=null;drawPins();try{history.replaceState(null,"",location.pathname)}catch(e){}render()};
+  $("#vis").onclick=()=>{S.visited.has(p.id)?S.visited.delete(p.id):S.visited.add(p.id);st.set("im-v",[...S.visited]);renderDetail();drawPins()};
+  $("#share").onclick=()=>share(p.n,location.href.split("#")[0]+"#"+p.id);
+  $("#ask").onclick=()=>{const b=$("#big");b.innerHTML=`<button class="ib" id="bigX" aria-label="Close">${I.x}</button><b lang="tr">${esc(p.ask)} nasıl gidebilirim?</b><p lang="tr">${esc(p.tr)}</p><p>How do I get to ${esc(p.n)}?</p>`;b.hidden=false;$("#bigX").onclick=()=>b.hidden=true;$("#bigX").focus()};
+}
+function clearRoute(){routeLine&&routeLine.remove();routeLine=null;activeRoute=null;drawPins()}
+function showRoute(r){
+  clearRoute();activeRoute=r;const pts=stops(r).map(([i])=>byId[i].ll);
+  routeLine=L.polyline(pts,{renderer:Rtop,weight:5,opacity:.9,lineCap:"round",lineJoin:"round",dashArray:r.mode==="transit"?"1 9":null,color:tok(AREA[r.a].c),interactive:false}).addTo(map);
+  drawPins();map.flyToBounds(L.latLngBounds(pts),{paddingTopLeft:desk()?[430,70]:[40,70],paddingBottomRight:desk()?[70,40]:[40,innerHeight*.52],duration:.5,maxZoom:16});
+}
+function routeCost(r){let t=0,np=0;for(const[i]of stops(r)){const p=byId[i];if(p.shut)continue;const u=usd(p);t+=u;if(!p.pass)np+=u}return{t:Math.round(t),np:Math.round(np)}}
+function renderRoutes(){
+  const M=moment(),dw=M.d.getDay(),dl=M.live?"today":DOW[dw];
+  const rank=r=>(r.best&&r.best.includes(dw))?0:(r.avoid&&r.avoid.includes(dw))?2:1;
+  const list=ROUTES.filter(r=>!r.best||r.best.includes(dw)||activeRoute===r).sort((a,b)=>rank(a)-rank(b));
+  body.innerHTML=list.map(r=>{const on=activeRoute===r,A=AREA[r.a],bad=r.avoid&&r.avoid.includes(dw),c=routeCost(r);
+   return`<div class="route"><button class="rh" data-r="${r.id}" aria-expanded="${on}"><span class="b${A.y?" y":""}" style="background:${col(r.a)}"><span>${r.id}</span></span><span class="t"><b>${esc(r.n)}</b><small>${esc(r.meta)}${bad?` · <span class="s-closed">Not ${dl}</span>`:r.best?` · <span class="s-open">Made for ${dl}</span>`:""}</small></span></button>
+   ${on?`<p class="d">${esc(r.d)}</p><ol class="line" style="--lc:${col(r.a)}">${r.s.map(x=>{if(!Array.isArray(x))return`<li class="walk">${esc(x)}</li>`;const p=byId[x[0]],s=status(p,{d:M.d,min:m2(x[1].slice(0,5).match(/^\d\d:\d\d$/)?x[1].slice(0,5):"12:00")});return`<li><button data-id="${p.id}"><b>${esc(p.n)}</b><small>${esc(x[1])} · ${price(p)}${usd(p)?" "+usdS(p):""}${p.pass?" · Pass":""}${s.open||p.free?"":` · <span class="s-closed">${esc(s.t)}</span>`}</small></button></li>`}).join("")}</ol>
+   <div class="rbar"><a class="pill solid" href="${gRoute(r)}" target="_blank" rel="noopener">${I.dir}Directions</a><button class="pill" data-share="${r.id}" aria-label="Share route">${I.share}</button><button class="pill" data-close aria-label="Close route">${I.x}</button>
+   <span class="cost">${c.t?`Tickets ≈ $${c.t}${c.np!==c.t?` · $${c.np} with pass`:""}`:"No tickets"}</span></div>`:""}</div>`}).join("")
+   +`<p class="foot">Solid line: on foot. Dotted: tram, bus or ferry. Directions open in Google Maps with every stop; Apple Maps takes one stop at a time from each place.</p>`;
+  body.querySelectorAll(".rh").forEach(b=>b.onclick=()=>{const r=ROUTES.find(x=>x.id===b.dataset.r);activeRoute===r?clearRoute():showRoute(r);renderRoutes()});
+  body.querySelectorAll(".line [data-id]").forEach(b=>b.onclick=()=>openPlace(b.dataset.id));
+  const c=body.querySelector("[data-close]");if(c)c.onclick=()=>{clearRoute();renderRoutes()};
+  const sh=body.querySelector("[data-share]");if(sh)sh.onclick=()=>share("Istanbul: "+activeRoute.n,gRoute(activeRoute));
+}
+function renderPlan(){
+  const now=ist(),M=moment(),pt=prayer(M.d),dw=M.d.getDay(),dl=M.live?"today":"on "+DOWL[dw];
+  const days=[...Array(7)].map((_,i)=>{const d=new Date(now);d.setDate(d.getDate()+i);return d});
+  const pool=P.filter(p=>!p.x||S.extras),open=pool.filter(p=>status(p,M).open).length;
+  const closed=pool.filter(p=>p.shut||(p.cl&&p.cl.includes(dw)));
+  const mosques=pool.filter(p=>p.mq);
+  const paid=P.filter(p=>!p.free&&(p.eur||p.try)),passN=paid.filter(p=>p.pass).length;
+  const chip=p=>`<button data-id="${p.id}">${bullet(p)}${esc(p.n)}</button>`;
+  const week=[1,2,3,4,5,6,0].map(d=>{const c=pool.filter(p=>p.cl&&p.cl.includes(d));return`<div class="dn${d===dw?" today":""}">${DOW[d]}</div><div>${c.length?c.map(p=>`<span title="${esc(p.n)}">${bullet(p)}</span>`).join(""):'<span class="none">Everything open</span>'}${d===5?'<span class="none" style="margin-left:4px">Mosques shut ~11:30–14:30</span>':""}</div>`}).join("");
+  body.innerHTML=`
+  <div class="sec" style="margin-top:8px"><div class="days">${days.map((d,i)=>`<button class="day" data-d="${i}" aria-pressed="${i===M.off}">${i===0?"Today":DOW[d.getDay()]}<b>${d.getDate()}</b></button>`).join("")}</div>
+   <div class="when"><b>${fmt(M.min)}</b><span>${open} of ${pool.length} open${M.live?"":` · <button class="s-open" id="live" style="font-weight:600">Now</button>`}</span></div>
+   <input id="tm" type="range" min="420" max="1410" step="15" value="${Math.min(1410,Math.max(420,M.min))}" aria-label="Time of day">
+   <div class="ticks"><span>07</span><span>11</span><span>15</span><span>19</span><span>23</span></div></div>
+  <div class="sec"><h3>Closed ${dl}<span>${closed.length}</span></h3>${closed.length?`<div class="bul">${closed.map(chip).join("")}</div>`:'<p class="foot" style="margin:0">Everything is open.</p>'}</div>
+  <div class="sec"><h3>Every week</h3><div class="week">${week}</div></div>
+  ${mosques.length?`<div class="sec"><h3>Mosque visits ${dl}<span>approx.</span></h3>
+   ${mosques.map(p=>`<button class="mrow" data-id="${p.id}" style="width:100%;text-align:left"><span class="l1">${bullet(p)}<b style="flex:1">${esc(p.n)}</b></span><div class="wins">${windows(p,M.d).map(([a,b])=>fmt(a)+"–"+fmt(b)).join("  ·  ")||"No visitor time"}</div></button>`).join("")}
+   <div class="pts">${["Dhuhr","Asr","Maghrib","Isha"].map(k=>`<span>${k}<b>${fmt(pt[k])}</b></span>`).join("")}</div>
+   <p class="foot" style="margin-top:8px">Mosques close to visitors from shortly before each prayer for 45–60 min. Hagia Sophia's gallery stays open except Friday noon.</p></div>`:""}
+  <div class="sec"><h3>Good to know</h3><div class="bento">
+   <div class="tile k w"><b>${passN} of ${paid.length}</b><span>paid sights take Museum Pass Istanbul. It runs 5 days from first entry, once per site, and skips ticket lines (not security). Not accepted at Hagia Sophia, the cisterns, Dolmabahçe, Beylerbeyi, Chora or private museums.</span><div class="meter">${paid.map(p=>`<i class="${p.pass?"on":""}"></i>`).join("")}</div></div>
+   <div class="tile"><b>09:00</b><span>Big sights at opening. Tour groups arrive from 10:00.</span></div>
+   <div class="tile"><b>${fmt(pt.sunset)}</b><span>Sunset ${dl}. Galata Tower, Maiden's Tower, Süleymaniye terrace.</span></div>
+   <div class="tile"><b>1 + 1</b><span>Two big sights a day is plenty. Topkapı alone is three hours.</span></div>
+   <div class="tile"><b>Cover up</b><span>Mosques: shoulders, knees and hair. Shoes off.</span></div>
+   <div class="tile w"><b>T1 tram</b><span>Kabataş, Karaköy, Eminönü, Gülhane, Sultanahmet, Beyazıt. Tap a contactless bank card at the gate, or buy an İstanbulkart from the yellow machines.</span></div>
+   <div class="tile"><b>Ferries</b><span>Public boats to Üsküdar and Kadıköy are the cheapest Bosphorus views.</span></div>
+   <div class="tile"><b>Lira</b><span>Cards work almost everywhere. Euro prices are charged in lira at the day's rate.</span></div>
+  </div></div>
+  <p class="foot">Prices from official sources, autumn 2026. Dollar amounts at ₺${FX.usdTry} = $1 and €1 = $${FX.eurUsd}.</p>`;
+  body.querySelectorAll(".day").forEach(b=>b.onclick=()=>{const i=+b.dataset.d;at=(i===0&&!at)?null:{day:i,min:at?at.min:Math.max(540,moment().min)};sync()});
+  const tm=$("#tm");tm.oninput=()=>{at={day:M.off,min:+tm.value};sync(true)};
+  const lv=$("#live");if(lv)lv.onclick=()=>{at=null;sync()};
+}
+function sync(keep){drawPins();island();if(keep&&tab==="plan"){const v=$("#tm").value,sc=body.scrollTop;renderPlan();bindRows();const t=$("#tm");t.value=v;t.focus();body.scrollTop=sc}else render()}
+function bindRows(){body.querySelectorAll("[data-id]").forEach(b=>{if(!b.onclick)b.onclick=()=>openPlace(b.dataset.id)})}
+function render(){
+  if(detail==="__set")return renderSettings();
+  if(detail)return renderDetail();
+  tab==="places"?renderPlaces():tab==="routes"?renderRoutes():renderPlan();
+  bindRows();
+}
+function island(){
+  const M=moment(),pool=P.filter(p=>!p.x||S.extras),open=pool.filter(p=>status(p,M).open).length;
+  $("#island").innerHTML=`<i class="dot${M.live?"":" past"}"></i>${M.live?"":DOW[M.d.getDay()]+" "}${fmt(M.min)}<small>${open} open</small>`;
+}
+$("#island").onclick=()=>{setTab("plan");if(snap<1)setSnap(1)};
+
+const isIOS=/iP(hone|ad|od)/.test(navigator.userAgent)||(navigator.platform==="MacIntel"&&navigator.maxTouchPoints>1);
+const standalone=matchMedia("(display-mode: standalone)").matches||navigator.standalone;
+let installEvt=null;addEventListener("beforeinstallprompt",e=>{e.preventDefault();installEvt=e});
+let guide=isIOS?"ios":"android";
+function renderSettings(){
+  detail="__set";
+  const sw=(id,on,label)=>`<button class="set" id="${id}" role="switch" aria-checked="${on}"><span>${label}</span><span class="sw" aria-checked="${on}"></span></button>`;
+  const iosSteps=`<ol class="steps"><li>Open this page in Safari.</li><li>Tap Share <svg class="i" viewBox="0 0 24 24"><path d="M12 15V3M7.5 7.5 12 3l4.5 4.5M5 12v8h14v-8"/></svg> in the toolbar.</li><li>Scroll and tap Add to Home Screen.</li><li>Tap Add. It opens full screen, like an app.</li></ol>`;
+  const andSteps=`<ol class="steps"><li>Open this page in Chrome.</li><li>Tap the ⋮ menu, top right.</li><li>Tap Add to Home screen, then Install.</li></ol>${installEvt?'<button class="pill solid" id="inst" style="margin-top:6px">Install now</button>':""}`;
+  body.innerHTML=`<div class="top"><button class="ib" id="back" aria-label="Close settings">${I.x}</button><b>Settings</b></div>
+   ${sw("sd",S.dark,"Dark mode")}${sw("sx",S.extras,"Show ◆ sights beyond state museums")}${sw("st",S.transit,"Tram, metro and ferry lines")}
+   <div class="sec"><h3>Add to Home Screen</h3>${standalone?'<p class="foot" style="margin:0">Already installed. You\'re using the app.</p>':`<div class="seg"><button data-g="ios" aria-pressed="${guide==="ios"}">iPhone</button><button data-g="android" aria-pressed="${guide==="android"}">Android</button></div>${guide==="ios"?iosSteps:andSteps}`}</div>
+   <div class="sec"><h3>Colours</h3><div class="key">${Object.values(AREA).map(a=>`<i class="b${a.y?" y":""}" style="background:var(${a.c});width:16px;height:16px;box-shadow:none"></i><span>${a.n}</span>`).join("")}<span class="b" style="background:var(--fg3);width:16px;height:16px;box-shadow:none"></span><span>State museum</span><span class="b x" style="background:var(--fg3);width:12px;height:12px;margin:2px;box-shadow:none"></span><span>Also worth it</span></div></div>
+   <div class="sec"><h3>Your visits</h3><button class="set" id="reset"><span>Clear visited marks</span><span class="cost">${S.visited.size}</span></button></div>
+   <p class="foot">Hours and prices change; check before you go. Map data © OpenStreetMap contributors, tiles © CARTO.</p>`;
+  $("#back").onclick=()=>{detail=null;setTab(tab)};
+  $("#sd").onclick=()=>{S.dark=!S.dark;st.set("im-d",S.dark);applyTheme();drawPins();renderSettings()};
+  $("#sx").onclick=()=>{S.extras=!S.extras;st.set("im-x",S.extras);drawPins();island();renderSettings()};
+  $("#st").onclick=()=>{S.transit=!S.transit;st.set("im-t",S.transit);S.transit?railL.addTo(map):railL.remove();renderSettings()};
+  $("#reset").onclick=()=>{S.visited.clear();st.set("im-v",[]);drawPins();renderSettings();toast("Visited marks cleared")};
+  body.querySelectorAll("[data-g]").forEach(b=>b.onclick=()=>{guide=b.dataset.g;renderSettings()});
+  const inst=$("#inst");if(inst)inst.onclick=async()=>{installEvt.prompt();await installEvt.userChoice;installEvt=null;renderSettings()};
+}
+$("#bSet").onclick=()=>{document.querySelectorAll(".tabs button").forEach(b=>b.setAttribute("aria-selected","false"));renderSettings();body.scrollTop=0;if(!desk()&&snap<1)setSnap(1)};
+addEventListener("keydown",e=>{if(e.key==="Escape"&&!$("#big").hidden)$("#big").hidden=true});
+
+map.fitBounds(L.latLngBounds(P.filter(p=>["sa","gh","bg"].includes(p.a)).map(p=>p.ll)),{paddingTopLeft:desk()?[420,40]:[24,70],paddingBottomRight:desk()?[60,40]:[24,innerHeight*.5],maxZoom:16});
+applyTheme();if(S.transit)railL.addTo(map);drawPins();island();setSnap(1);render();
+const fromHash=()=>{const id=location.hash.slice(1);if(byId[id])openPlace(id)};addEventListener("hashchange",fromHash);fromHash();
+setInterval(()=>{if(!at){drawPins();island();if(!detail&&tab!=="plan")render()}},60000);
+if("serviceWorker" in navigator&&location.protocol==="https:")navigator.serviceWorker.register("sw.js").catch(()=>{});
+</script>
+</body>
+</html>

@@ -1,2 +1,3 @@
-# Istanbul
-A mini site for museums of Istanbul.
+# Istanbul Museums
+
+A map of Istanbul museums and sights with tickets, hours and routes.
