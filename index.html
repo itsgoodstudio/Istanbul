@@ -447,7 +447,7 @@ function restyle(){
   railLines.forEach(pl=>pl.setStyle({color:tok("--rail"),opacity:.85}));
   if(routeLine)routeLine.setStyle({color:tok(AREA[activeRoute.a].c)});
 }
-function applyTheme(){document.documentElement.dataset.mode=S.dark?"dark":"light";document.querySelector('meta[name="theme-color"]').content=S.dark?"#0b0b0b":"#ffffff";restyle();setTiles()}
+function applyTheme(){document.documentElement.dataset.mode=S.dark?"dark":"light";(document.querySelector('meta[name="theme-color"]')||{}).content=S.dark?"#0b0b0b":"#ffffff";restyle();setTiles()}
 let sel=null,activeRoute=null,routeLine=null,me=null,acc=null;
 function drawPins(){
   pinL.clearLayers();const M=moment();
