@@ -18,6 +18,7 @@
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" href="favicon.png">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/maplibre-gl@5.24.0/dist/maplibre-gl.css">
 <style>
 :root{
   --bg:#ffffff;--land:#f2f2ef;--mah:#dcdcd7;--water:#d6dee3;--fg:#0d0d0d;--fg2:#555555;--fg3:#868686;
@@ -229,7 +230,7 @@ input[type=range]{width:100%;accent-color:var(--fg);height:30px;margin:4px 0 0}
 </head>
 <body>
 <div id="map" role="application" aria-label="Map of Istanbul"></div>
-<div class="attr" id="attr">© OpenStreetMap · © CARTO</div>
+<div class="attr" id="attr">© OpenStreetMap</div>
 <button class="island glass" id="island" aria-label="Open plan"></button>
 <div class="rail">
   <div class="grp glass">
@@ -261,6 +262,8 @@ input[type=range]{width:100%;accent-color:var(--fg);height:30px;margin:4px 0 0}
 </section>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/maplibre-gl@5.24.0/dist/maplibre-gl.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@maplibre/maplibre-gl-leaflet@0.1.4/leaflet-maplibre-gl.js"></script>
 <script>
 const FX={usdTry:49.6,eurUsd:1.12};
 const AREA={
@@ -429,15 +432,24 @@ map.createPane("vec");map.getPane("vec").style.zIndex=150;
 const R=L.canvas({pane:"vec",padding:.5}),Rtop=L.canvas({padding:.5});
 const vec=L.layerGroup().addTo(map),railL=L.layerGroup(),pinL=L.layerGroup().addTo(map),labelL=L.layerGroup().addTo(map);
 let baseLayers=[],mahLayer=null,railLines=[],tiles=null,tilesOK=false;
-const TILES=[
- {u:d=>`https://{s}.basemaps.cartocdn.com/${d?"dark_all":"light_all"}/{z}/{x}/{y}{r}.png`,o:{subdomains:"abcd"},a:"© OpenStreetMap · © CARTO"},
- {u:()=>"https://tile.openstreetmap.org/{z}/{x}/{y}.png",o:{},a:"© OpenStreetMap"}];
-let tileIdx=0;
+const ATTR="© OpenFreeMap © OpenMapTiles © OpenStreetMap";
+function baseReady(a){tilesOK=true;labelL.remove();$("#attr").textContent=a}
+function rasterFallback(){
+  tiles&&tiles.remove();
+  tiles=L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png",{maxZoom:19}).addTo(map);
+  tiles.once("tileload",()=>baseReady("© OpenStreetMap"));
+}
 function setTiles(){
-  tiles&&tiles.remove();const T=TILES[tileIdx];let ok=0,err=0;
-  tiles=L.tileLayer(T.u(S.dark),{maxZoom:19,...T.o}).addTo(map);
-  tiles.on("tileload",()=>{if(!ok++){tilesOK=true;labelL.remove();$("#attr").textContent=T.a}});
-  tiles.on("tileerror",()=>{if(!ok&&++err>=4&&tileIdx<TILES.length-1){tileIdx++;setTiles()}});
+  tiles&&tiles.remove();tiles=null;
+  const gl=window.maplibregl&&L.maplibreGL&&(()=>{try{const c=document.createElement("canvas");return!!(c.getContext("webgl2")||c.getContext("webgl"))}catch(e){return false}})();
+  if(!gl)return rasterFallback();
+  const tryStyle=name=>{
+    const layer=L.maplibreGL({style:"https://tiles.openfreemap.org/styles/"+name,interactive:false,attributionControl:false}).addTo(map);tiles=layer;
+    const m=layer.getMaplibreMap();let done=false;
+    m.on("load",()=>{done=true;baseReady(ATTR)});
+    m.on("error",()=>{if(done||tiles!==layer)return;done=true;layer.remove();tiles=null;name!=="positron"?tryStyle("positron"):rasterFallback()});
+  };
+  tryStyle(S.dark?"dark":"positron");
 }
 fetch("map.json").then(r=>r.json()).then(g=>{
   g.base.forEach(ring=>baseLayers.push(L.polygon(ring.map(([x,y])=>[y,x]),{renderer:R,interactive:false,stroke:false,fillOpacity:1}).addTo(vec)));
@@ -661,7 +673,7 @@ function renderSettings(){
    <div class="sec"><h3>Add to Home Screen</h3>${standalone?'<p class="foot" style="margin:0">Already installed. You\'re using the app.</p>':`<div class="seg"><button data-g="ios" aria-pressed="${guide==="ios"}">iPhone</button><button data-g="android" aria-pressed="${guide==="android"}">Android</button></div>${guide==="ios"?iosSteps:andSteps}`}</div>
    <div class="sec"><h3>Colours</h3><div class="key">${Object.values(AREA).map(a=>`<i class="b${a.y?" y":""}" style="background:var(${a.c});width:16px;height:16px;box-shadow:none"></i><span>${a.n}</span>`).join("")}<span class="b" style="background:var(--fg3);width:16px;height:16px;box-shadow:none"></span><span>State museum</span><span class="b x" style="background:var(--fg3);width:12px;height:12px;margin:2px;box-shadow:none"></span><span>Also worth it</span></div></div>
    <div class="sec"><h3>Your visits</h3><button class="set" id="reset"><span>Clear visited marks</span><span class="cost">${S.visited.size}</span></button></div>
-   <p class="foot">Hours and prices change; check before you go. Map data © OpenStreetMap contributors, tiles © CARTO.</p>`;
+   <p class="foot">Hours and prices change; check before you go. Map © OpenFreeMap, © OpenMapTiles, © OpenStreetMap contributors.</p>`;
   $("#back").onclick=()=>{detail=null;setTab(tab)};
   $("#sd").onclick=()=>{S.dark=!S.dark;st.set("im-d",S.dark);applyTheme();drawPins();renderSettings()};
   $("#sx").onclick=()=>{S.extras=!S.extras;st.set("im-x",S.extras);drawPins();island();renderSettings()};
