@@ -429,10 +429,15 @@ map.createPane("vec");map.getPane("vec").style.zIndex=150;
 const R=L.canvas({pane:"vec",padding:.5}),Rtop=L.canvas({padding:.5});
 const vec=L.layerGroup().addTo(map),railL=L.layerGroup(),pinL=L.layerGroup().addTo(map),labelL=L.layerGroup().addTo(map);
 let baseLayers=[],mahLayer=null,railLines=[],tiles=null,tilesOK=false;
+const TILES=[
+ {u:d=>`https://{s}.basemaps.cartocdn.com/${d?"dark_all":"light_all"}/{z}/{x}/{y}{r}.png`,o:{subdomains:"abcd"},a:"© OpenStreetMap · © CARTO"},
+ {u:()=>"https://tile.openstreetmap.org/{z}/{x}/{y}.png",o:{},a:"© OpenStreetMap"}];
+let tileIdx=0;
 function setTiles(){
-  tiles&&tiles.remove();
-  tiles=L.tileLayer(`https://{s}.basemaps.cartocdn.com/${S.dark?"dark_all":"light_all"}/{z}/{x}/{y}{r}.png`,{subdomains:"abcd",maxZoom:19,detectRetina:false,crossOrigin:true}).addTo(map);
-  tiles.once("tileload",()=>{tilesOK=true;labelL.remove();$("#attr").textContent="© OpenStreetMap · © CARTO"});
+  tiles&&tiles.remove();const T=TILES[tileIdx];let ok=0,err=0;
+  tiles=L.tileLayer(T.u(S.dark),{maxZoom:19,...T.o}).addTo(map);
+  tiles.on("tileload",()=>{if(!ok++){tilesOK=true;labelL.remove();$("#attr").textContent=T.a}});
+  tiles.on("tileerror",()=>{if(!ok&&++err>=4&&tileIdx<TILES.length-1){tileIdx++;setTiles()}});
 }
 fetch("map.json").then(r=>r.json()).then(g=>{
   g.base.forEach(ring=>baseLayers.push(L.polygon(ring.map(([x,y])=>[y,x]),{renderer:R,interactive:false,stroke:false,fillOpacity:1}).addTo(vec)));
